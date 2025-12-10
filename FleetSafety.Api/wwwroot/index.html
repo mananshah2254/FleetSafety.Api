@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <title>Fleet Safety System – Altom Transport & Al Warren Oil</title>
+
     <meta charset="utf-8" />
     <title>Fleet Safety Console</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -11,6 +13,10 @@
     />
 </head>
 <body class="bg-light">
+    <div style="background:#1a1a1a; color:white; padding:10px; text-align:center; font-size:14px;">
+        Fleet Safety Demo – Built for Altom Transport & Al Warren Oil
+    </div>
+    
     <div class="container py-4">
         <h1 class="mb-4">Fleet Safety Console</h1>
 
@@ -376,27 +382,35 @@
         }
 
         document.getElementById("inspectionForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const record = {
-                driverId: parseInt(document.getElementById("inspectionDriver").value, 10),
-                vehicleId: parseInt(document.getElementById("inspectionVehicle").value, 10),
-                inspectionDate: document.getElementById("inspectionDate").value,
-                location: document.getElementById("inspectionLocation").value,
-                result: document.getElementById("inspectionResult").value,
-                violationCount: parseInt(document.getElementById("violationCount").value, 10),
-                isOutOfService: document.getElementById("isOutOfService").checked,
-                notes: document.getElementById("inspectionNotes").value
-            };
+    e.preventDefault();
 
-            await fetch(inspectionsApi, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(record)
-            });
+    const record = {
+        driverId: parseInt(document.getElementById("inspectionDriver").value, 10),
+        vehicleId: parseInt(document.getElementById("inspectionVehicle").value, 10),
+        inspectionDate: document.getElementById("inspectionDate").value,
+        location: document.getElementById("inspectionLocation").value,
+        result: document.getElementById("inspectionResult").value,
+        violationCount: parseInt(document.getElementById("violationCount").value, 10),
+        isOutOfService: document.getElementById("isOutOfService").checked,
+        notes: document.getElementById("inspectionNotes").value
+    };
 
-            e.target.reset();
-            await loadInspections();
-        });
+    const res = await fetch("/api/inspections", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(record)
+    });
+
+    if (!res.ok) {
+        console.error("Failed to create inspection", await res.text());
+        alert("Failed to create inspection. Check console/logs.");
+        return;
+    }
+
+    e.target.reset();
+    await loadInspections();
+});
+
 
         // ---------- INITIAL LOAD ----------
         async function init() {
@@ -407,5 +421,9 @@
 
         init();
     </script>
+    <footer style="margin-top:40px; text-align:center; color:#666; font-size:12px;">
+        Custom-built demo for Altom Transport & Al Warren Oil – © 2025
+    </footer>
+    
 </body>
 </html>

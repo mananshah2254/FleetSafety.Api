@@ -19,12 +19,15 @@ namespace FleetSafety.Api.Controllers
         // GET: api/inspections
         [HttpGet]
         public async Task<ActionResult<IEnumerable<InspectionRecord>>> GetInspections()
-        {
-            return await _context.InspectionRecords
-                .Include(i => i.Driver)
-                .Include(i => i.Vehicle)
-                .ToListAsync();
-        }
+{
+    var inspections = await _context.InspectionRecords
+        .Include(i => i.Driver)
+        .Include(i => i.Vehicle)
+        .OrderByDescending(i => i.InspectionDate)
+        .ToListAsync();
+
+    return inspections;
+}
 
         // GET: api/inspections/5
         [HttpGet("{id}")]
@@ -44,17 +47,21 @@ namespace FleetSafety.Api.Controllers
         // POST: api/inspections
         [HttpPost]
         public async Task<ActionResult<InspectionRecord>> CreateInspection(InspectionRecord record)
-        {
-            // Optional safety: ensure driver and vehicle exist
-            if (!await _context.Drivers.AnyAsync(d => d.Id == record.DriverId))
-                return BadRequest("Driver does not exist.");
-            if (!await _context.Vehicles.AnyAsync(v => v.Id == record.VehicleId))
-                return BadRequest("Vehicle does not exist.");
+{
+    if (!await _context.Drivers.AnyAsync(d => d.Id == record.DriverId))
+        return BadRequest("Driver does not exist.");
 
-            _context.InspectionRecords.Add(record);
-            await _context.SaveChangesAsync();
+    if (!await _context.Vehicles.AnyAsync(v => v.Id == record.VehicleId))
+        return BadRequest("Vehicle does not exist.");
 
-            return CreatedAtAction(nameof(GetInspection), new { id = record.Id }, record);
-        }
+    _context.InspectionRecords.Add(record);
+    await _context.SaveChangesAsync();
+
+    // Optional: load navs for response
+    await _context.Entry(record).Reference(r => r.Driver).LoadAsync();
+    await _context.Entry(record).Reference(r => r.Vehicle).LoadAsync();
+
+    return CreatedAtAction(nameof(GetInspection), new { id = record.Id }, record);
+}
     }
 }
