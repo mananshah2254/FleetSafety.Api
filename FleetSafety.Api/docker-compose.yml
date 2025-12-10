@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: fleet-db
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Manan@fall23
+    volumes:
+      - sql-data:/var/opt/mssql
+
+  api:
+    build: .
+    container_name: fleet-api
+    depends_on:
+      - db
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Server=db,1433;Database=FleetSafetyDb;User Id=sa;Password=Manan@fall23;TrustServerCertificate=True;Encrypt=False;
+    ports:
+      - "80:8080"
+
+volumes:
+  sql-data:

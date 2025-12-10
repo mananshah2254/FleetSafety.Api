@@ -1,0 +1,6 @@
+@FleetSafety.Api_HostAddress = http://localhost:5294
+
+GET {{FleetSafety.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
